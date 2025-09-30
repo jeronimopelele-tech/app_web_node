@@ -28,8 +28,8 @@ app_web_node/
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/candesjara/nodejs_test.git
-cd nodejs_test/backend
+git clone https://github.com/candesjara/app_web_node.git
+cd app_web_node/backend
 ```
 
 2. Instala las dependencias:
