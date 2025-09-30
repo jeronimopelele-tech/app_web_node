@@ -18,7 +18,7 @@ app_web_node/
 │   │   └── empleado.route.js        # Rutas REST del recurso empleado
 │   ├── database.js                  # Conexión a MongoDB
 │   └── index.js                     # Punto de entrada del servidor
-
+```
 ---
 
 ## 🚀 Instalación y Ejecución
