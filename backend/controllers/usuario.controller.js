@@ -1,46 +1,65 @@
 const Usuario = require('../models/usuario');
 const usuarioCtrl = {};
 
-// GET - todos los usuarios
+// ✅ GET - todos los usuarios
 usuarioCtrl.getUsuarios = async (req, res) => {
-  const usuarios = await Usuario.find();
-  res.json(usuarios);
-};
-
-// POST - crear usuario
-usuarioCtrl.createUsuario = async (req, res) => {
   try {
-    if (req.body._id === '') delete req.body._id;
-    const usuario = new Usuario(req.body);
-    await usuario.save();
-    res.status(201).json(usuario);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const usuarios = await Usuario.find();
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
-// GET - uno por ID
+// ✅ POST - crear usuario
+usuarioCtrl.createUsuario = async (req, res) => {
+  try {
+    const { nombre, correo, password } = req.body;
+    const nuevoUsuario = new Usuario({ nombre, correo, password });
+    await nuevoUsuario.save();
+    res.status(201).json(nuevoUsuario);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ GET - uno por ID
 usuarioCtrl.getUsuarioById = async (req, res) => {
-  const usuario = await Usuario.findById(req.params.id);
-  res.json(usuario);
+  try {
+    const usuario = await Usuario.findById(req.params.id);
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-// PUT - actualizar usuario
+// ✅ PUT - actualizar usuario
 usuarioCtrl.updateUsuario = async (req, res) => {
-  const { id } = req.params;
-  const data = {
-    nombre: req.body.nombre,
-    correo: req.body.correo,
-    contraseña: req.body.contraseña
-  };
-  await Usuario.findByIdAndUpdate(id, { $set: data }, { new: true });
-  res.json({ status: 'Usuario actualizado' });
+  try {
+    const { id } = req.params;
+    const { nombre, correo, password } = req.body;
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(
+      id,
+      { nombre, correo, contraseña },
+      { new: true }
+    );
+    if (!usuarioActualizado) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(usuarioActualizado);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-// DELETE - eliminar usuario
+// ✅ DELETE - eliminar usuario
 usuarioCtrl.deleteUsuario = async (req, res) => {
-  await Usuario.findByIdAndDelete(req.params.id);
-  res.json({ status: 'Usuario eliminado' });
+  try {
+    const usuarioEliminado = await Usuario.findByIdAndDelete(req.params.id);
+    if (!usuarioEliminado) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = usuarioCtrl;

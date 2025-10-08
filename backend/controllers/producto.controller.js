@@ -1,47 +1,74 @@
 const Producto = require('../models/producto');
 const productoCtrl = {};
 
-// GET - todos los productos
+// ✅ GET - Todos los productos
 productoCtrl.getProductos = async (req, res) => {
-  const productos = await Producto.find();
-  res.json(productos);
-};
-
-// POST - crear producto
-productoCtrl.createProducto = async (req, res) => {
   try {
-    if (req.body._id === '') delete req.body._id;
-    const producto = new Producto(req.body);
-    await producto.save();
-    res.status(201).json(producto);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const productos = await Producto.find();
+    res.json(productos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
-// GET - uno por ID
+// ✅ POST - Crear producto
+productoCtrl.createProducto = async (req, res) => {
+  try {
+    const { nombre, descripcion, precio, stock } = req.body;
+
+    if (!nombre || !descripcion || !precio || stock === undefined) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    const nuevoProducto = new Producto({ nombre, descripcion, precio, stock });
+    await nuevoProducto.save();
+
+    res.status(201).json(nuevoProducto);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ GET - Producto por ID
 productoCtrl.getProductoById = async (req, res) => {
-  const producto = await Producto.findById(req.params.id);
-  res.json(producto);
+  try {
+    const producto = await Producto.findById(req.params.id);
+    if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
+    res.json(producto);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-// PUT - actualizar producto
+// ✅ PUT - Actualizar producto
 productoCtrl.updateProducto = async (req, res) => {
-  const { id } = req.params;
-  const data = {
-    nombre: req.body.nombre,
-    descripcion: req.body.descripcion,
-    precio: req.body.precio,
-    stock: req.body.stock
-  };
-  await Producto.findByIdAndUpdate(id, { $set: data }, { new: true });
-  res.json({ status: 'Producto actualizado' });
+  try {
+    const { id } = req.params;
+    const { nombre, descripcion, precio, stock } = req.body;
+
+    const actualizado = await Producto.findByIdAndUpdate(
+      id,
+      { nombre, descripcion, precio, stock },
+      { new: true }
+    );
+
+    if (!actualizado) return res.status(404).json({ error: 'Producto no encontrado' });
+
+    res.json(actualizado);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-// DELETE - eliminar producto
+// ✅ DELETE - Eliminar producto
 productoCtrl.deleteProducto = async (req, res) => {
-  await Producto.findByIdAndDelete(req.params.id);
-  res.json({ status: 'Producto eliminado' });
+  try {
+    const eliminado = await Producto.findByIdAndDelete(req.params.id);
+    if (!eliminado) return res.status(404).json({ error: 'Producto no encontrado' });
+    res.json({ message: 'Producto eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = productoCtrl;

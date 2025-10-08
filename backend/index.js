@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 // Cargar variables de entorno
-dotenv.config();
+dotenv.config();console.log('📄 process.env:', process.env);
+
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Conexión a MongoDB
+console.log("🌍 MONGODB_URI desde .env:", process.env.MONGODB_URI);
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch(err => console.error('❌ Error al conectar a MongoDB', err));
