@@ -1,42 +1,37 @@
 const express = require('express');
-const morgan = require('morgan');
 const cors = require('cors');
+const morgan = require('morgan');
 const mongoose = require('mongoose');
-require('dotenv').config(); // Para usar variables del .env
+const dotenv = require('dotenv');
+
+// Cargar variables de entorno
+dotenv.config();
 
 const app = express();
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/miapp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log('✅ Conectado a MongoDB'))
-  .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
-
-//  Configuraciones
-app.set('port', process.env.PORT || 3000);
-
-//  Middlewares
-app.use(morgan('dev'));
+// Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
-//  Rutas (importación)
-const empleadoRoutes = require('./routes/empleado.routes');
-const usuarioRoutes = require('./routes/usuario.routes');
-const productoRoutes = require('./routes/producto.routes');
-const servicioRoutes = require('./routes/servicio.routes');
-const authRoutes = require('./routes/auth.routes');
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ Conectado a MongoDB'))
+  .catch(err => console.error('❌ Error al conectar a MongoDB', err));
 
-//  Registro de rutas
-app.use('/api/empleados', empleadoRoutes);
-app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/productos', productoRoutes);
-app.use('/api/servicios', servicioRoutes);
-app.use('/api/auth', authRoutes);
+// Rutas
+app.use('/api/auth', require('./routes/auth.routes'));  // 👈 Autenticación
+app.use('/api/usuarios', require('./routes/usuario.routes')); // 👈 Usuarios
+app.use('/api/productos', require('./routes/producto.routes')); // 👈 Productos
+app.use('/api/servicios', require('./routes/servicio.routes')); // 👈 Servicios
 
-// Inicio del servidor
-app.listen(app.get('port'), () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${app.get('port')}`);
+// Ruta base
+app.get('/', (req, res) => {
+  res.send('🌐 API funcionando correctamente');
+});
+
+// Iniciar servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
