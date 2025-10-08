@@ -1,43 +1,42 @@
-/**
- * Archivo principal del servidor backend.
- * 
- * Aquí se configura y arranca el servidor Express.
- * Se definen los middlewares, la conexión a la base de datos y las rutas.
- */
-
-// -----------------------------------
-// Importaciones de módulos
-// -----------------------------------
 const express = require('express');
-const morgan = require('morgan');           
-const cors = require('cors');               
-const { mongoose } = require('./database'); 
+const morgan = require('morgan');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config(); // Para usar variables del .env
 
-// -----------------------------------
-// Inicialización de la aplicación
-// -----------------------------------
 const app = express();
 
-// -----------------------------------
-// Configuraciones del servidor
-// -----------------------------------
+// Conexión a MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/miapp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log('✅ Conectado a MongoDB'))
+  .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
+
+//  Configuraciones
 app.set('port', process.env.PORT || 3000);
 
-// -----------------------------------
-// Middlewares
-// -----------------------------------
+//  Middlewares
 app.use(morgan('dev'));
+app.use(cors());
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:4200' }));
 
-// -----------------------------------
-// Rutas del servidor
-// -----------------------------------
-app.use('/api/empleados', require('./routes/empleado.routes'));
+//  Rutas (importación)
+const empleadoRoutes = require('./routes/empleado.routes');
+const usuarioRoutes = require('./routes/usuario.routes');
+const productoRoutes = require('./routes/producto.routes');
+const servicioRoutes = require('./routes/servicio.routes');
+const authRoutes = require('./routes/auth.routes');
 
-// -----------------------------------
+//  Registro de rutas
+app.use('/api/empleados', empleadoRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/productos', productoRoutes);
+app.use('/api/servicios', servicioRoutes);
+app.use('/api/auth', authRoutes);
+
 // Inicio del servidor
-// -----------------------------------
 app.listen(app.get('port'), () => {
-    console.log('Servidor activo en el puerto', app.get('port'));
+  console.log(`🚀 Servidor corriendo en http://localhost:${app.get('port')}`);
 });
